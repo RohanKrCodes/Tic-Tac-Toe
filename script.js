@@ -66,14 +66,50 @@ document.addEventListener("DOMContentLoaded", function () {
 
   function makeAIMove() {
     let emptyCells = [];
+    let winMove = null;
+    let blockMove = null;
+
     for (let i = 0; i < board.length; i++) {
       if (board[i] === "") {
         emptyCells.push(i);
       }
     }
-    const randomIndex = Math.floor(Math.random() * emptyCells.length);
-    const move = emptyCells[randomIndex];
-    board[move] = currentPlayer;
+
+    // Check for a winning move or a blocking move
+    for (let combo of winningCombinations) {
+      const [a, b, c] = combo;
+      if (
+        (board[a] === "O" && board[b] === "O" && board[c] === "") ||
+        (board[a] === "O" && board[c] === "O" && board[b] === "") ||
+        (board[b] === "O" && board[c] === "O" && board[a] === "")
+      ) {
+        winMove = board[c] === "" ? c : board[b] === "" ? b : a;
+      } else if (
+        (board[a] === "X" && board[b] === "X" && board[c] === "") ||
+        (board[a] === "X" && board[c] === "X" && board[b] === "") ||
+        (board[b] === "X" && board[c] === "X" && board[a] === "")
+      ) {
+        blockMove = board[c] === "" ? c : board[b] === "" ? b : a;
+      }
+    }
+
+    if (winMove !== null) {
+      board[winMove] = "O";
+    } else if (blockMove !== null) {
+      board[blockMove] = "O";
+    } else {
+      const strategicMoves = [4, 0, 2, 6, 8];
+      for (let move of strategicMoves) {
+        if (emptyCells.includes(move)) {
+          board[move] = "O";
+          break;
+        }
+      }
+      if (board.join("").length === 1) {
+        board[emptyCells[Math.floor(Math.random() * emptyCells.length)]] = "O";
+      }
+    }
+
     renderBoard();
     const winner = checkWinner();
     if (winner) {
